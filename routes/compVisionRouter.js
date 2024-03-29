@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const fs = require("fs");
 
 const { ImageAnalysisClient } = require("@azure-rest/ai-vision-image-analysis");
 const createClient = require("@azure-rest/ai-vision-image-analysis").default;
@@ -22,7 +23,7 @@ const features = [
   "Tags",
 ];
 
-
+// iamge analysis using image url
 router.post("/imageanalysis/url",async (req,res) => {
 
   try {
@@ -39,51 +40,60 @@ router.post("/imageanalysis/url",async (req,res) => {
 
     const iaResult = result.body;
 
-    res.status(200).json({ result: iaResult });
+    if(iaResult.error) {
+      const error = iaResult.error;
+      res.status(400).json({error});
+    }
+    else{
+      res.status(200).json({ result: iaResult });
+    }
 
     
   } catch (error) {
     res.status(500).json({error})
   }
   
+});
 
-})
+// handeling local images
+router.get("/imageanalysis/image", async (req, res) => {
+  try {
+
+    const imagePath = "./images/image_2.jpeg";
+    const imageBuffer = fs.readFileSync(imagePath);
+    //console.log(imageBuffer);
+    const result = await client.path("/imageanalysis:analyze").post({
+      body: imageBuffer,
+      queryParameters: {
+        features: features,
+      },
+      contentType: "application/octet-stream",
+    });
+
+    const iaResult = result.body;
+
+    if (iaResult.error) {
+      const error = iaResult.error;
+      res.status(400).json({ error });
+    } else {
+      res.status(200).json({ result: iaResult });
+    }
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
+
+// router.post("/imageanalysis/image", async (req, res) => {
+//   const formData = req.body;
+//   console.log(formData);
+
+//   res.json("success");
+// });
+
+
+
+
 
 
 module.exports = router;
-
-
-
-
-
-// const imageUrl =
-//   "https://th.bing.com/th/id/OIP.XztsnQoaNQ-XS4t4VFlbDAHaD3?rs=1&pid=ImgDetMain";
-
-// async function analyzeImageFromUrl() {
-  
-//   console.log(iaResult);
-
-//   // if (iaResult.captionResult) {
-//   //   console.log(
-//   //     `Caption: ${iaResult.captionResult.text} (confidence: ${iaResult.captionResult.confidence})`
-//   //   );
-//   // }
-//   // // if (iaResult.readResult) {
-//   // //   iaResult.readResult.blocks.forEach((block) =>
-//   // //     console.log(`Text Block: ${JSON.stringify(block)}`)
-//   // //   );
-//   // // }
-
-//   // if (iaResult.objectsResult) {
-//   //   iaResult.objectsResult.values.forEach((object) =>
-//   //     console.log(`Object: ${JSON.stringify(object)}`)
-//   //   );
-//   // }
-//   // if (iaResult.tagsResult) {
-//   //   iaResult.tagsResult.values.forEach((tag) =>
-//   //     console.log(`Tag: ${JSON.stringify(tag)}`)
-//   //   );
-//   // }
-// }
-
-// analyzeImageFromUrl();

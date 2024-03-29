@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const fs = require("fs");
+const multer = require("multer");
 
 const { ImageAnalysisClient } = require("@azure-rest/ai-vision-image-analysis");
 const createClient = require("@azure-rest/ai-vision-image-analysis").default;
@@ -22,6 +23,8 @@ const features = [
   "SmartCrops",
   "Tags",
 ];
+
+const upload = multer({ dest: "uploads/" });
 
 // iamge analysis using image url
 router.post("/imageanalysis/url",async (req,res) => {
@@ -83,13 +86,34 @@ router.get("/imageanalysis/image", async (req, res) => {
   }
 });
 
+// handeling image uploads
+router.post("/imageanalysis/image",upload.single("image"), async (req, res) => {
+ 
+  try {
+    const imagePath = req.file.path;
+    const imageBuffer = fs.readFileSync(imagePath);
 
-// router.post("/imageanalysis/image", async (req, res) => {
-//   const formData = req.body;
-//   console.log(formData);
+    //console.log(imageBuffer);
+    const result = await client.path("/imageanalysis:analyze").post({
+      body: imageBuffer,
+      queryParameters: {
+        features: features,
+      },
+      contentType: "application/octet-stream",
+    });
 
-//   res.json("success");
-// });
+    const iaResult = result.body;
+
+    if (iaResult.error) {
+      const error = iaResult.error;
+      res.status(400).json({ error });
+    } else {
+      res.status(200).json({ result: iaResult });
+    }
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
 
 
 

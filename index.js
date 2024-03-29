@@ -10,9 +10,8 @@ const imageRouter = require("./routes/compVisionRouter");
 const app = express();
 
 
-app.use(bodyParser.json());
-// Parse URL-encoded bodies (as sent by HTML forms)
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+
 
 const port = process.env.PORT || 3000;// app runing port number
 

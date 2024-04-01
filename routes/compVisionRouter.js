@@ -48,7 +48,7 @@ router.post("/imageanalysis/url",async (req,res) => {
       res.status(400).json({error});
     }
     else{
-      res.status(200).json({ result: iaResult });
+      res.status(200).json({ result: iaResult.captionResult });
     }
 
     
@@ -79,7 +79,7 @@ router.get("/imageanalysis/image", async (req, res) => {
       const error = iaResult.error;
       res.status(400).json({ error });
     } else {
-      res.status(200).json({ result: iaResult });
+      res.status(200).json({ result: iaResult.captionResult });
     }
   } catch (error) {
     res.status(500).json({ error });
@@ -108,7 +108,7 @@ router.post("/imageanalysis/image",upload.single("image"), async (req, res) => {
       const error = iaResult.error;
       res.status(400).json({ error });
     } else {
-      res.status(200).json({ result: iaResult });
+      res.status(200).json({ result: iaResult.captionResult });
     }
   } catch (error) {
     res.status(500).json({ error });

@@ -64,7 +64,7 @@ router.get("/imageanalysis/image", async (req, res) => {
 
     const imagePath = "./images/image_2.jpeg";
     const imageBuffer = fs.readFileSync(imagePath);
-    //console.log(imageBuffer);
+    console.log(imageBuffer);
     const result = await client.path("/imageanalysis:analyze").post({
       body: imageBuffer,
       queryParameters: {
@@ -92,6 +92,7 @@ router.post("/imageanalysis/image",upload.single("image"), async (req, res) => {
   try {
     const imagePath = req.file.path;
     const imageBuffer = fs.readFileSync(imagePath);
+    console.log(imageBuffer)
 
     //console.log(imageBuffer);
     const result = await client.path("/imageanalysis:analyze").post({
@@ -114,6 +115,39 @@ router.post("/imageanalysis/image",upload.single("image"), async (req, res) => {
     res.status(500).json({ error });
   }
 });
+
+
+// handeling image buffers
+router.post("/imageanalysis/imagebuffer", async (req, res) => {
+ 
+  try {
+
+    const imageBuffer = req.body.imageBuffer
+
+    const bufferObject = Buffer.from(imageBuffer.data);
+    console.log(bufferObject)
+
+    const result = await client.path("/imageanalysis:analyze").post({
+      body: bufferObject,
+      queryParameters: {
+        features: features,
+      },
+      contentType: "application/octet-stream",
+    });
+
+    const iaResult = result.body;
+
+    if (iaResult.error) {
+      const error = iaResult.error;
+      res.status(400).json({ error });
+    } else {
+      res.status(200).json({ result: iaResult.captionResult });
+    }
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
 
 
 

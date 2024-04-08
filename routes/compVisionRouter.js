@@ -64,7 +64,7 @@ router.get("/imageanalysis/image", async (req, res) => {
 
     const imagePath = "./images/image_2.jpeg";
     const imageBuffer = fs.readFileSync(imagePath);
-    console.log(imageBuffer);
+    
     const result = await client.path("/imageanalysis:analyze").post({
       body: imageBuffer,
       queryParameters: {
@@ -92,9 +92,7 @@ router.post("/imageanalysis/image",upload.single("image"), async (req, res) => {
   try {
     const imagePath = req.file.path;
     const imageBuffer = fs.readFileSync(imagePath);
-    console.log(imageBuffer)
-
-    //console.log(imageBuffer);
+   
     const result = await client.path("/imageanalysis:analyze").post({
       body: imageBuffer,
       queryParameters: {
@@ -109,7 +107,13 @@ router.post("/imageanalysis/image",upload.single("image"), async (req, res) => {
       const error = iaResult.error;
       res.status(400).json({ error });
     } else {
-      res.status(200).json({ result: iaResult.captionResult });
+      // Convert JSON object to a string
+      const jsonString = JSON.stringify(iaResult);
+
+      // Output the string representation
+      console.log(jsonString + "\n");
+      
+      res.status(200).json({ result: iaResult });
     }
   } catch (error) {
     res.status(500).json({ error });
